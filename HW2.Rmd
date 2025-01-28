@@ -1,0 +1,240 @@
+---
+title: "HW2"
+author: "Isabelle Svendsen"
+date: "2025-01-25"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(kableExtra)
+```
+
+Isabelle Svendsen EID: iks294 Github Link: https://github.com/isvendsen06/HW2
+
+# **Problem One**
+
+```{r echo=FALSE, message = FALSE, warning = FALSE}
+profs <- read.csv("profs.csv")
+```
+
+## Part A.
+
+```{r echo= FALSE, message = FALSE, warning = FALSE}
+profs_ggplot <- ggplot(profs)
+
+profs_ggplot + geom_histogram(aes(x=eval),binwidth= 0.25, col='black', fill= 'lightblue') + scale_x_continuous(limits= c(1, NA)) + labs(title = "Distribution of Course Evaluation Scores", x= "Eval Scores", y= "Frequency")
+```
+
+The graph above shows the distribution of the course evaluation scores that were given to the teachers. The evaluation scores were from 1 to 5 with 5 being the highest and best score. The distribution is skewed to the left with the majority of the scores being above 3. The minimum score given was `r min(profs$eval)`, the median is `r median(profs$eval)`, max of `r max(profs$eval)`, with an IQR of `r IQR(profs$eval)`. This shows the the majority of the students rated their teachers with a higher score.
+
+## Part B.
+
+```{r echo= FALSE, message = FALSE, warning = FALSE}
+profs_ggplot + geom_boxplot(aes(x=native, y=eval), col= 'black', fill='lightpink') + scale_y_continuous(limits= c(1, NA)) + labs(title= "Distribution of Course Eval Scores by Native English Speaker", x= "Native English Speaker", y= "Eval Scores") 
+```
+
+This side by side box plot shows this distribution of the course evaluation scores based on whether the teacher is a Native English speaker. Based on the graph you can see that the teachers that are native speakers have a higher median and both Q1 and Q3. The native speakers also have a larger range of their scores, ranging from around 2 - 5 where the non native English speakers range from approximately 2.75 to 4.5.
+
+## Part C.
+
+```{r echo= FALSE, message = FALSE, warning = FALSE}
+profs_ggplot + geom_histogram(aes(x=eval, fill = gender), bindwith=0.25, col='black') + facet_wrap(~ gender, nrow = 2) + scale_x_continuous(limits= c(1, NA)) + labs(title = "Distribution of Course Evaluation Scores based on Professor Gender", x= "Eval Scores", y= "Frequency", fill = "Gender")
+```
+
+The graph of these histograms compare the distribution of course evaluation scores for male and female instructors. Both of the graphs are skewed left, however when comparing them the males are skewed more, with more higher scores then the females. The graph also shows that there were more evaluations done for the males as there were more in this study. Overall it shows that males had slightly better course eval scores, however they had more responses which is a reason why it could be more skewed.
+
+# Part D.
+
+```{r echo= FALSE, message = FALSE, warning = FALSE}
+profs_ggplot + geom_point(aes(x=beauty, y= eval), col= "#00C19A") + scale_y_continuous(limits= c(1, NA)) + scale_x_continuous(limits= c(-2, NA)) + labs(title= "Professors Physical Attractiveness vs. Course Evaluations", x="Professors Physical Attractiveness", y="Course Evaluation Scores")
+
+```
+
+This scatter plot shows the association of the rating of the Professors physical attractiveness and the course evaluation scores they received. The Professors physical attractiveness is shown by having 0 be the average score and the rest of the numbers represent how far that teacher scored from the average. The correlation between the two is `r cor(profs$beauty, profs$eval)`, this is a small correlation but since its positive this means that the higher the attractive rating the higher chance they were also have a higher eval score. This means that students might be judging their teachers based on how they look and present themselves to the class.
+
+# **Problem Two**
+
+```{r echo= FALSE, message = FALSE, warning = FALSE}
+bike_share <- read.csv("bikeshare.csv")
+```
+
+## Part A.
+
+```{r echo= FALSE, message = FALSE, warning = FALSE}
+group_rides <- group_by(bike_share, hr)
+avg_rides <- summarize(group_rides, avg_rentals = mean(total))
+
+bike_ggplot <- ggplot(bike_share)
+avg_ggplot <- ggplot(avg_rides)
+avg_ggplot + geom_line(aes(x= hr, y= avg_rentals), col='#FF16CC') + scale_x_continuous(limits = c(0, 24)) + labs(title= "Average Hourly Bike Rentals", x= "Hour of Day", y="Average Rentals" )
+
+
+```
+
+The line graph above shows the average hourly bike rentals from the Capital Bikeshare system in Washington, DC. The graph is shown for the averages at each out throughout the 24 hours of the day. When looking as the graph we can see that the lowest is early in the morning mainly before aroun 6 am. This makes sense because most people are still asleep and have yet to leave for work or school. It is also coldest in the morning so people light choose a different and warmer form of transportation in the morning. The highest points are around 8 am and 5 pm. This makes sense because this is considered the rush hours for commuting to work and schools.
+
+## Part B.
+
+```{r echo= FALSE, message = FALSE, warning = FALSE}
+# Group the data by hour (hr) and whether it's a working day (workingday)
+group_workingday <- group_by(bike_share, hr, workingday)
+
+# Calculate the average of the 'total' column (assuming 'total' is the rental count)
+rental_workingday <- summarize(group_workingday, avg_total = mean(total))
+
+workingday_ggplot <- ggplot(rental_workingday)
+
+workingday_ggplot + geom_line(aes(x= hr, y= avg_total), col="blue") + facet_wrap(~ workingday, labeller = labeller(workingday = c("0" = "Non-Working Day", "1" = "Working Day"))) + scale_x_continuous(limits = c(0, 24)) + labs(title= "Average Hourly Bike Rentals (Split By Working Day)", x= "Hour of Day", y="Average Rentals" )
+
+
+```
+
+The side by side line graphs show the average rentals for each hour of the 24 hour day, comparing whether the day was a working day (any day other then a weekend and a holiday) or if it was a non working day. It is shown that there is more bike shares on the working day, this would be due to more of the commuting route to go to school or work. The graphs are opposites in a way, the peak on the non working day is during the mid-day around noon, this makes sense because on these days people get to sleep in and then get to go out for lunches or activities.
+
+## Part C.
+
+```{r echo= FALSE, message = FALSE, warning = FALSE}
+morning <- filter(bike_share, hr==9)
+
+avg_morning <- aggregate(morning$total, 
+                         by = list(morning$weathersit, morning$workingday),
+                         FUN= mean)
+
+colnames(avg_morning) <- c("weathersit", "workingday", "avg_rentals")
+morning_ggplot <- ggplot(avg_morning)
+
+morning_ggplot + geom_bar((aes( x= as.factor(weathersit), y= avg_rentals, fill= as.factor(weathersit))), stat ="identity") +
+  facet_wrap(~ workingday, labeller = labeller(workingday = c("0" = "Non-Working Day", "1" = "Working Day"))) + labs(title = "Average Ridership During 9 AM Hour by Weather Situation and Working Day",  x = "Weather Situation",  y = "Average Ridership", fill="Weather") + scale_x_discrete(labels = c("1" = "Clear", "2" = "Mist", "3" = "Light Snow/Rain", "4" = "Heavy Snow/Rain")) 
+```
+
+These bar plots show the average ridership at 9 am by their weather situation, then it is compared between weather it is a working-day or a non-working day. The 3 weather situations shown are 1-Clear, 2-Mist, 3-Light Snow/Rain. The graphs show how overall no matter the weather the working day has a higher average ridership at 9 am. This is due to the fact that more people have to transport to their jobs and don't really have a choice. This is also why the average ridership is higher for the light snow and rain on the working days because they don't have a choice to just not ride the bikes if that is their only option to commute. Where as on the non working days,they can choose to not take the bikes because they don't have to commute that day.
+
+# **Problem 3.**
+
+```{r echo= FALSE, message = FALSE, warning = FALSE}
+capmetro_UT <- read.csv("capmetro_UT.csv")
+
+```
+
+## Plot 1.
+
+```{r, echo= FALSE, message = FALSE, warning = FALSE}
+#convert
+capmetro_UT = mutate(capmetro_UT,
+                    day_of_week = factor(day_of_week,
+                                        levels=c("Mon", "Tue", "Wed","Thu", "Fri", "Sat","Sun")),
+                    month = factor(month,
+                                  levels=c("Sep", "Oct","Nov")))
+
+boardings <- aggregate(capmetro_UT$boarding,
+                       by = list(capmetro_UT$hour_of_day,
+                                 capmetro_UT$day_of_week,
+                                 capmetro_UT$month),
+                       FUN = mean)
+
+colnames(boardings) <- c("hour_of_day","day_of_week", "month", "avg_boardings")
+#convert back to factors
+boardings$day_of_week <- factor(boardings$day_of_week,
+                               levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
+boardings$month <- factor(boardings$month,
+                          levels = c("Sep", "Oct", "Nov"))
+metro_ggplot <- ggplot(boardings)
+
+metro_ggplot + geom_line(aes(x= hour_of_day, y= avg_boardings, color= month)) + facet_wrap(~ day_of_week) + labs(title = "Average Boardings by Day of Week, Hour of Day, and Months", x = "Hour of Day", y= "Average Boardings", color = "Month")
+```
+
+The faceted line graphs show the average boarding of the Capital Metro for the UT campus and area. The graphs are separated by days of the week. Each individual graph has a y-axis of the average boardings and an x-axis of the hour of the day (0-24). Each graph also shows how the months of September, October and November compare.
+
+The hour of peak boardings stays around 5 pm on the weekdays, the peak changes however on the weekends when less people are commuting since there is no classes so less people will be trying to commute to the campus. During the weekdays we can see that the highest point of each day is increasing until 5 pm when it hits its peak and then starts decreasing again. I think the average boardings on Mondays in September look lower due to students may have no started their classes yet and have a delayed return back to commuting. The dip in the commuting in November from Wednesday/Thursday/Fridays could be due to the holiday of Thanksgiving where people leave the campus area so there isn't classes to be commuting for. People either leave early for the break as well as aren't home for those days during the Thanksgiving break because most people get the Thursday and Friday off of work and school.
+
+## Plot 2.
+
+```{r echo= FALSE, message = FALSE, warning = FALSE}
+capmetro_ggplot <- ggplot(capmetro_UT)
+
+capmetro_ggplot + 
+  geom_point(aes(x= temperature, y= boarding, color = as.factor(weekend))) + facet_wrap (~hour_of_day) + labs(title= "Bus Boardings vs. Temperature by Hour of Day", x= "Temperature", y= "Number of Boardings", color= "Weekend")
+```
+
+The faceted scatter plot shows the number of boardings vs the tempature (in degrees F) of the day. The graph is split up based on the hour of the day that the metro is running, 6 am to 9 pm. The graphs also show the split between the points of whether its a weekday or a weekend. As shown on the graphs the weekends have lower boardings across all hours of the day. The boardings also increase throughout the hours of the day.
+
+When we hold hour of the day and weekend status constant no it doesn't show a strong association between the temperature outside and the amount of boardings, people will take the metro since its covered, whether its nice out or not. The data is relatively constant throughout the temperatures, the graphs all look to have a slightly straight horizontal line of slope, this shows that it does stay constant. People are going to take the metro if it is cold outside and they are also going to take it if its hot to get ac and not have to walk in the heat. This makes sense, also people who have access to the metro are going to use it no matter what because it is convenient and it doesn't make sense to walk to where they have to go if it is far.
+
+# **Problem 4.**
+
+```{r echo=FALSE, message = FALSE, warning = FALSE}
+billboard <- read.csv("billboard.csv")
+```
+
+## Part A.
+
+```{r echo=FALSE, message = FALSE, warning = FALSE}
+#Used aggregate to create new set with weeks, songs, and the artist.
+popular <- aggregate(billboard$week, 
+                           by = list(billboard$performer, billboard$song),
+                           FUN= length)
+colnames(popular) <- c("performer", "song","weeks")
+
+popular <- popular[order(-popular$weeks),][1:10,]
+print(kable(popular))
+```
+
+In this table of the top 10 most popular songs since 1958 to 2021, we can see that the song that was on the Billboard 100 for the longest was Radioactive by the Imagine Dragons for 87 weeks. The top ten songs were calculated by the amount of weeks the song was on the Billboard 100.
+
+## Part B.
+
+```{r echo= FALSE, message = FALSE, warning = FALSE}
+filtered_billboard <- filter(billboard, year >1958 & year <2021)
+
+
+
+
+times_per_year <- aggregate(filtered_billboard$song,
+                            by = list(filtered_billboard$year, filtered_billboard$song),
+                            FUN = length)
+colnames(times_per_year) <- c("year", "song", "times_per_year")
+
+unique_songs <- aggregate(times_per_year$song, 
+                          by= list(times_per_year$year),
+                          FUN = length)
+
+colnames(unique_songs) <- c("year", "unique_count")
+
+unique_ggplot <- ggplot(unique_songs)
+
+unique_ggplot + geom_line(aes(x= year, y= unique_count), col="purple") + labs(title="Musical Diversity of Billboard Over the Years", x= "Year", y="Number of Unique Songs", caption= "Data does not inclue the years 1958 and 2021 due to the data not being completly recorded.")
+```
+
+This line graph shows the Musical Diversity on the Billboard 100 over the years 1959-2020. The find the musical diversity its the number of unique songs that appeared on the billboards. The line graph shows that the highest peak of unique songs was around 1965 with 800 unique songs on the billboard. The lowest was around the year 2000 with just below 400 unique songs. This could be the fact that during the 2000 many of the same songs stayed popular for longer making there be less new songs on the billboard and the same songs stayed for a while. The graph is on the incline from around the year 2015 with 2020 having just below 800 unique songs. Now with streaming platforms it is easy to find and make new songs popular making more songs have a chance to get on the Billboard 100.
+
+## Part C.
+
+```{r echo=FALSE, message = FALSE, warning = FALSE}
+ten_week_hits <- filter(billboard, weeks_on_chart >=10)
+
+
+# Aggregate by artist and song_id, counting how many distinct songs each artist has with 10+ weeks
+by_artist <- aggregate(ten_week_hits$song_id,
+                       by = list(performer = ten_week_hits$performer), 
+                       FUN = function(x) length(unique(x)))
+
+# Rename columns for clarity
+colnames(by_artist) <- c("artist", "num_ten_week_hits")
+
+# Filter for artists with at least 30 ten-week hits
+by_artist <- filter(by_artist, num_ten_week_hits >= 30)
+
+artist_ggplot <- ggplot(by_artist)
+
+artist_ggplot + geom_bar(aes( x= artist, y= num_ten_week_hits),col="black", fill="darkgreen", stat ="identity") +coord_flip() +labs(title =" Artist Ten Week Hit Count", x= "Artist Name", y="Number of Songs", caption =" The graph shows the 19 perfomers who have had over 30 songs hit the ten week hit count.")
+
+```
+
+This bar plot shows the only 19 performers from 1958 who have had 30 songs hit the ten week count of the Billboard 100. Elton John has the most with over 50 songs be on the ten week count. The artist spread has artists that are more recent as well as artists that are older, this shows how its possible to have 30 songs hit the ten week count even if the artist is newer. Every person on this list is very well known and famous as well which could help contribute on making more of their songs a hit that stays longer on the billboard.
