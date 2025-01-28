@@ -29,6 +29,7 @@ profs <- read.csv("profs.csv")
 ```{r echo= FALSE, message = FALSE, warning = FALSE}
 profs_ggplot <- ggplot(profs)
 
+#create ggplot with the profs, using the eval
 profs_ggplot + geom_histogram(aes(x=eval),binwidth= 0.25, col='black', fill= 'lightblue') + scale_x_continuous(limits= c(1, NA)) + labs(title = "Distribution of Course Evaluation Scores", x= "Eval Scores", y= "Frequency")
 ```
 
@@ -37,6 +38,7 @@ The graph above shows the distribution of the course evaluation scores that were
 ## Part B.
 
 ```{r echo= FALSE, message = FALSE, warning = FALSE}
+
 profs_ggplot + geom_boxplot(aes(x=native, y=eval), col= 'black', fill='lightpink') + scale_y_continuous(limits= c(1, NA)) + labs(title= "Distribution of Course Eval Scores by Native English Speaker", x= "Native English Speaker", y= "Eval Scores") 
 ```
 
@@ -68,6 +70,7 @@ bike_share <- read.csv("bikeshare.csv")
 ## Part A.
 
 ```{r echo= FALSE, message = FALSE, warning = FALSE}
+#use group by to seperate by hr and then summarize to get the average rides
 group_rides <- group_by(bike_share, hr)
 avg_rides <- summarize(group_rides, avg_rentals = mean(total))
 
@@ -83,10 +86,10 @@ The line graph above shows the average hourly bike rentals from the Capital Bike
 ## Part B.
 
 ```{r echo= FALSE, message = FALSE, warning = FALSE}
-# Group the data by hour (hr) and whether it's a working day (workingday)
+# Group the data by hr and whether it's a working day
 group_workingday <- group_by(bike_share, hr, workingday)
 
-# Calculate the average of the 'total' column (assuming 'total' is the rental count)
+# Calculate the average of the 'total' column 
 rental_workingday <- summarize(group_workingday, avg_total = mean(total))
 
 workingday_ggplot <- ggplot(rental_workingday)
@@ -101,8 +104,10 @@ The side by side line graphs show the average rentals for each hour of the 24 ho
 ## Part C.
 
 ```{r echo= FALSE, message = FALSE, warning = FALSE}
+#filter to get only 9 am
 morning <- filter(bike_share, hr==9)
 
+#use aggregate to get a new set with the weathersit, workingday and rentals
 avg_morning <- aggregate(morning$total, 
                          by = list(morning$weathersit, morning$workingday),
                          FUN= mean)
@@ -140,6 +145,7 @@ boardings <- aggregate(capmetro_UT$boarding,
                        FUN = mean)
 
 colnames(boardings) <- c("hour_of_day","day_of_week", "month", "avg_boardings")
+
 #convert back to factors
 boardings$day_of_week <- factor(boardings$day_of_week,
                                levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))
@@ -191,9 +197,9 @@ In this table of the top 10 most popular songs since 1958 to 2021, we can see th
 ## Part B.
 
 ```{r echo= FALSE, message = FALSE, warning = FALSE}
+
+#filter the years out
 filtered_billboard <- filter(billboard, year >1958 & year <2021)
-
-
 
 
 times_per_year <- aggregate(filtered_billboard$song,
@@ -201,6 +207,7 @@ times_per_year <- aggregate(filtered_billboard$song,
                             FUN = length)
 colnames(times_per_year) <- c("year", "song", "times_per_year")
 
+#to find unique songs 
 unique_songs <- aggregate(times_per_year$song, 
                           by= list(times_per_year$year),
                           FUN = length)
@@ -225,7 +232,7 @@ by_artist <- aggregate(ten_week_hits$song_id,
                        by = list(performer = ten_week_hits$performer), 
                        FUN = function(x) length(unique(x)))
 
-# Rename columns for clarity
+
 colnames(by_artist) <- c("artist", "num_ten_week_hits")
 
 # Filter for artists with at least 30 ten-week hits
